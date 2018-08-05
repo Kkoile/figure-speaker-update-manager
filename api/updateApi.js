@@ -1,4 +1,3 @@
-/*eslint no-console: 0*/
 "use strict";
 
 var winston = require('winston');
@@ -25,7 +24,7 @@ updateApi.route('/checkForUpdate').get(function (req, res, next) {
 });
 
 updateApi.route('/installLatest').post(function (req, res, next) {
-    winston.info("Installing Latest Update");
+    winston.info("Installing Latest Version");
     updateController.installLatest()
         .then(function(oData) {
             res.send(oData);

@@ -23,7 +23,7 @@ app.use('/updates/', require('./api/updateApi'));
 
 app.use(require('./api/errorHandler'));
 
-app.use(express.static('../frontend/dist'));
+app.use(express.static('./resources'));
 
 app.get('/', function (req, res) {
     res.redirect('/index.html');
@@ -41,7 +41,7 @@ app.post('/logLevel', function (req, res) {
     res.send("Successfully set log level to " + sLevel);
 });
 
-var port = process.env.PORT || 4000;
+var port = process.env.PORT || 3001;
 var listener = app.listen(port, function () {
     winston.info('Figure Speaker Update Manager HTTP server up and running, listening on port ' + listener.address().port);
 });

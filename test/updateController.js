@@ -2,7 +2,7 @@ var assert = require('assert');
 var sinon = require('sinon');
 var nock = require('nock');
 
-var unzip = require('unzipper');
+var child_process = require('child_process');
 var fs = require('fs');
 
 var updateController = require('../lib/updateController');
@@ -42,19 +42,6 @@ describe('Update Controller', function () {
         });
     });
 
-    describe('_getDownloadUrlOfLatestVersion', function () {
-        it('should call github API and retrieve url', function (done) {
-
-            nock("https://api.github.com").get("/repos/Kkoile/figure-speaker/releases/latest").reply(200, JSON.stringify({tarball_url: "https://download/url"}));
-
-            updateController._getDownloadUrlOfLatestVersion().then(function (sUrl) {
-                assert(sUrl === "https://download/url");
-                assert(nock.isDone());
-                done();
-            });
-        });
-    });
-
     describe('checkForUpdate', function () {
         it('should compare given version with latest version', function (done) {
 
@@ -80,17 +67,93 @@ describe('Update Controller', function () {
         });
     });
 
-    describe('_downloadLatestVersion', function () {
-        it('should download unzip and save latest release', function (done) {
-            nock("https://api.github.com").get("/repos/Kkoile/figure-speaker/releases/latest").reply(200, JSON.stringify({tarball_url: "https://download/url"}));
-            nock("https://download").get("/url").reply(200, "BINARY ZIP FORMAT");
-            var oStub = sandbox.stub(unzip, 'Extract').resolves("Kkoile-figure-speaker-3810034");
-            var oStub = sandbox.stub(fs, 'readdirSync').returns(["Kkoile-figure-speaker-3810034"]);
+    describe('_runNPMUpdate', function () {
+        it('should run npm update', function (done) {
+            var aPassedArgs;
+            var fnError;
+            var fnClose;
+            var oProcess = {
+                on: function(sEvent, fnFunction) {
+                    if (sEvent === 'error') {
+                        fnError = fnFunction;
+                    } else if (sEvent === 'close') {
+                        fnClose  =fnFunction;
+                    }
+                }
+            };
+            var oNpmUpdateStub = sandbox.stub(child_process, 'spawn').callsFake(function(sCommand, aArgs) {
+                aPassedArgs = aArgs;
+                return oProcess;
+            });
 
-            updateController._downloadLatestVersion().then(function (sPath) {
-                assert(sPath === process.cwd() + '/tmp/Kkoile-figure-speaker-3810034');
+            updateController._runNPMUpdate().then(function () {
+                assert(oNpmUpdateStub.calledOnce);
+                assert(aPassedArgs.length === 3);
+                assert(aPassedArgs[0] === 'update');
+                assert(aPassedArgs[1] === '-g');
+                assert(aPassedArgs[2] === 'figure-speaker');
+
                 done();
             });
+            fnClose(0);
+        });
+        it('should reject because there was an error', function (done) {
+            var aPassedArgs;
+            var fnError;
+            var fnClose;
+            var oProcess = {
+                on: function(sEvent, fnFunction) {
+                    if (sEvent === 'error') {
+                        fnError = fnFunction;
+                    } else if (sEvent === 'close') {
+                        fnClose = fnFunction;
+                    }
+                }
+            };
+            var oNpmUpdateStub = sandbox.stub(child_process, 'spawn').callsFake(function(sCommand, aArgs) {
+                aPassedArgs = aArgs;
+                return oProcess;
+            });
+
+            updateController._runNPMUpdate().catch(function () {
+                assert(oNpmUpdateStub.calledOnce);
+                assert(aPassedArgs.length === 3);
+                assert(aPassedArgs[0] === 'update');
+                assert(aPassedArgs[1] === '-g');
+                assert(aPassedArgs[2] === 'figure-speaker');
+
+                done();
+            });
+            fnError();
+        });
+        it('should reject because there was an error', function (done) {
+            var aPassedArgs;
+            var fnError;
+            var fnClose;
+            var oProcess = {
+                on: function(sEvent, fnFunction) {
+                    if (sEvent === 'error') {
+                        fnError = fnFunction;
+                    } else if (sEvent === 'close') {
+                        fnClose = fnFunction;
+                    }
+                }
+            };
+            var oNpmUpdateStub = sandbox.stub(child_process, 'spawn').callsFake(function(sCommand, aArgs) {
+                aPassedArgs = aArgs;
+                return oProcess;
+            });
+
+            updateController._runNPMUpdate().catch(function () {
+                assert(oNpmUpdateStub.calledOnce);
+                assert(aPassedArgs.length === 3);
+                assert(aPassedArgs[0] === 'update');
+                assert(aPassedArgs[1] === '-g');
+                assert(aPassedArgs[2] === 'figure-speaker');
+
+                done();
+            });
+            fnClose(1);
         });
     });
 
