@@ -1,0 +1,8 @@
+*npm-debug.log
+.eslintrc.yml
+.idea/
+.jshintignore
+.jshintrc
+node_modules/
+package-lock.json
+server/.nyc_output/
