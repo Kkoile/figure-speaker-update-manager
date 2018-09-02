@@ -1,9 +1,11 @@
 {
-  "private": true,
+  "preferGlobal": true,
   "name": "figure-speaker-update-manager",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "author": "Nils Hirsekorn",
   "description": "Update Manager for Figure Speaker Project",
+  "repository": "git@github.com:Kkoile/figure-speaker-update-manager.git",
+  "license": "MIT",
   "engines": {
     "node": "^6.0.0"
   },
@@ -12,15 +14,16 @@
     "test": "mocha"
   },
   "main": "index.js",
+  "bin": {
+    "figure-speaker-update-manager": "./bin/start-server.js"
+  },
   "dependencies": {
     "ajv": "^6.0.0",
     "body-parser": "1.18.2",
-    "child-process-promise": "2.2.1",
     "compare-versions": "3.3.0",
     "express": "4.16.2",
     "request": "2.83.0",
     "request-promise": "4.2.2",
-    "unzipper": "0.9.2",
     "winston": "2.4.0"
   },
   "devDependencies": {
