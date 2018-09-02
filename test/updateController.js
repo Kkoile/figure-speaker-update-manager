@@ -89,9 +89,9 @@ describe('Update Controller', function () {
             updateController._runNPMUpdate().then(function () {
                 assert(oNpmUpdateStub.calledOnce);
                 assert(aPassedArgs.length === 3);
-                assert(aPassedArgs[0] === 'update');
+                assert(aPassedArgs[0] === 'install');
                 assert(aPassedArgs[1] === '-g');
-                assert(aPassedArgs[2] === 'figure-speaker');
+                assert(aPassedArgs[2] === 'figure-speaker@latest');
 
                 done();
             });
@@ -118,9 +118,9 @@ describe('Update Controller', function () {
             updateController._runNPMUpdate().catch(function () {
                 assert(oNpmUpdateStub.calledOnce);
                 assert(aPassedArgs.length === 3);
-                assert(aPassedArgs[0] === 'update');
+                assert(aPassedArgs[0] === 'install');
                 assert(aPassedArgs[1] === '-g');
-                assert(aPassedArgs[2] === 'figure-speaker');
+                assert(aPassedArgs[2] === 'figure-speaker@latest');
 
                 done();
             });
@@ -147,13 +147,119 @@ describe('Update Controller', function () {
             updateController._runNPMUpdate().catch(function () {
                 assert(oNpmUpdateStub.calledOnce);
                 assert(aPassedArgs.length === 3);
-                assert(aPassedArgs[0] === 'update');
+                assert(aPassedArgs[0] === 'install');
                 assert(aPassedArgs[1] === '-g');
+                assert(aPassedArgs[2] === 'figure-speaker@latest');
+
+                done();
+            });
+            fnClose(1);
+        });
+    });
+
+    describe('_restartFigureSpeaker', function () {
+        it('should run systemctl restart', function (done) {
+            var aPassedArgs;
+            var fnError;
+            var fnClose;
+            var oProcess = {
+                on: function(sEvent, fnFunction) {
+                    if (sEvent === 'error') {
+                        fnError = fnFunction;
+                    } else if (sEvent === 'close') {
+                        fnClose  =fnFunction;
+                    }
+                }
+            };
+            var oRestartStub = sandbox.stub(child_process, 'spawn').callsFake(function(sCommand, aArgs) {
+                aPassedArgs = aArgs;
+                return oProcess;
+            });
+
+            updateController._restartFigureSpeaker().then(function () {
+                assert(oRestartStub.calledOnce);
+                assert(aPassedArgs.length === 3);
+                assert(aPassedArgs[0] === 'systemctl');
+                assert(aPassedArgs[1] === 'restart');
+                assert(aPassedArgs[2] === 'figure-speaker');
+
+                done();
+            });
+            fnClose(0);
+        });
+        it('should reject because there was an error', function (done) {
+            var aPassedArgs;
+            var fnError;
+            var fnClose;
+            var oProcess = {
+                on: function(sEvent, fnFunction) {
+                    if (sEvent === 'error') {
+                        fnError = fnFunction;
+                    } else if (sEvent === 'close') {
+                        fnClose = fnFunction;
+                    }
+                }
+            };
+            var oRestartStub = sandbox.stub(child_process, 'spawn').callsFake(function(sCommand, aArgs) {
+                aPassedArgs = aArgs;
+                return oProcess;
+            });
+
+            updateController._restartFigureSpeaker().catch(function () {
+                assert(oRestartStub.calledOnce);
+                assert(aPassedArgs.length === 3);
+                assert(aPassedArgs[0] === 'systemctl');
+                assert(aPassedArgs[1] === 'restart');
+                assert(aPassedArgs[2] === 'figure-speaker');
+
+                done();
+            });
+            fnError();
+        });
+        it('should reject because there was an error', function (done) {
+            var aPassedArgs;
+            var fnError;
+            var fnClose;
+            var oProcess = {
+                on: function(sEvent, fnFunction) {
+                    if (sEvent === 'error') {
+                        fnError = fnFunction;
+                    } else if (sEvent === 'close') {
+                        fnClose = fnFunction;
+                    }
+                }
+            };
+            var oRestartStub = sandbox.stub(child_process, 'spawn').callsFake(function(sCommand, aArgs) {
+                aPassedArgs = aArgs;
+                return oProcess;
+            });
+
+            updateController._restartFigureSpeaker().catch(function () {
+                assert(oRestartStub.calledOnce);
+                assert(aPassedArgs.length === 3);
+                assert(aPassedArgs[0] === 'systemctl');
+                assert(aPassedArgs[1] === 'restart');
                 assert(aPassedArgs[2] === 'figure-speaker');
 
                 done();
             });
             fnClose(1);
+        });
+    });
+
+
+
+    describe('installLatest', function () {
+        it('should first update npm module and the restart figure-speaker', function (done) {
+
+            var oNpmUpdateStub = sandbox.stub(updateController, '_runNPMUpdate').resolves();
+            var oRestartStub = sandbox.stub(updateController, '_restartFigureSpeaker').resolves();
+
+            updateController.installLatest().then(function (oData) {
+                assert(oNpmUpdateStub.calledOnce);
+                assert(oRestartStub.calledOnce);
+                done();
+            });
         });
     });
 
