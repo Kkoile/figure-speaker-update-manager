@@ -1,7 +1,7 @@
 {
   "preferGlobal": true,
   "name": "figure-speaker-update-manager",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "author": "Nils Hirsekorn",
   "description": "Update Manager for Figure Speaker Project",
   "repository": "git@github.com:Kkoile/figure-speaker-update-manager.git",
