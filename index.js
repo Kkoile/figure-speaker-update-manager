@@ -4,6 +4,7 @@
 var winston = require('winston');
 
 var url = require('url');
+var path = require('path');
 var express = require('express');
 var app = express();
 
@@ -23,7 +24,7 @@ app.use('/updates/', require('./api/updateApi'));
 
 app.use(require('./api/errorHandler'));
 
-app.use(express.static('./resources'));
+app.use(express.static(path.join(__dirname, './resources')));
 
 app.get('/', function (req, res) {
     res.redirect('/index.html');
