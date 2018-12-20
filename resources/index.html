@@ -33,13 +33,21 @@
 
 <body>
     <h1>Figure Speaker Updates</h1>
-    <h2>Please wait while we update your figure speaker...</h2>
+    <h2>Please wait while we update your figure speaker. This might take up to 10 minutes...</h2>
+    <h2>Do not leave this page. You will be redirect to your figure speaker, once we are finished.</h2>
     <div class="spinner"></div>
     <script type="text/javascript">
         var xhttp = new XMLHttpRequest();
         xhttp.onreadystatechange = function() {
             if (this.readyState == 4 && this.status == 200) {
-                window.location.href = 'http://localhost:3000';
+                if (document.referrer) {
+                    window.location.href = document.referrer;
+                } else {
+                    alert("Successfully installed update");
+                }
+            }
+            if (this.readyState == 4 && this.status != 200) {
+                alert("Failure while updating");
             }
         };
         xhttp.open("POST", "/updates/installLatest", true);
